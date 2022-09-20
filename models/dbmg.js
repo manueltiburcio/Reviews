@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-mongoose.connect(`mongodb://localhost/${process.env.MG_DB_NAME}`);
+mongoose.connect('mongodb://localhost/reviews-mongo');
 
 let reviewSchema = mongoose.Schema({
   review_id: Number,

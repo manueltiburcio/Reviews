@@ -4,8 +4,8 @@ const client = new Client({
   host: 'localhost',
   user: 'postgres',
   port: 5432,
-  password: `${process.env.PG_PASS}`,
-  database: `${process.env.PG_DB_NAME}`
+  password: '112233',
+  database: 'reviews'
 })
 
 module.exports = client;
