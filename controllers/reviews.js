@@ -3,64 +3,107 @@ let RW = require('../models');
 
 module.exports = {
 
-  getReview: (req, res) => {
-    var limit = req.params.count || 5;
-    var offset = req.params.page || 1;
-    var id = parseInt(req.params.product_id) || 1;
+  getReview: async (req, res) => {
+    const page = req.params.page || 1;
+    const count = req.params.count || 5;
+    const product_id = parseInt(req.params.product_id);
 
-    RW.reviews.reviews([id])
-      .then(response => {
-        res.status(200).send(response.rows[0].json_build_object);
+    try {
+      let response = await RW.reviews.reviews([product_id]);
+
+      response.rows[0].json_agg.map(review => {
+        review.date = new Date(Number(review.date)).toISOString();
       })
-      .catch(err => console.log(err));
+      response = response.rows[0].json_agg;
+
+      res.status(200);
+      res.send({
+        product: product_id,
+        page: page,
+        count: count,
+        results: response
+      })
+
+    } catch (error) {
+      console.error(error);
+      res.status(404);
+    }
+
+
   },
 
-  getMeta: (req, res) => {
-    var id = parseInt(req.params.product_id) || 1;
-    RW.reviews.meta([id, id, id])
-    .then(response => {
+  getMeta: async (req, res) => {
+    const product_id = parseInt(req.params.product_id);
+
+    try {
+      let response = await RW.reviews.meta([product_id, product_id, product_id]);
+
+      let obj = response.rows[0].json_build_object.characteristics
+
+      // for (key in obj) {
+      //   console.log(obj[key].id);
+      // }
+
       res.status(200).send(response.rows[0].json_build_object);
-    })
-    .catch(err => console.log(err));
+
+    } catch (error) {
+      console.error(error);
+      res.status(404);
+    }
+
+
+
   },
 
-  // TODO SET createReview
-  createReview: (req, res) => {
+  // TODO FINISH createReview
+  createReview: async (req, res) => {
 
-    let productId = parseInt(req.params.id);
-    let rating = (req.params.rating)
-    let summary = (req.params.rating)
-    let body = (req.params.body)
-    let recommend = (req.params.recommend)
-    let name = (req.params.name)
-    let email = (req.params.email)
-    let photos = (req.params.photos)
-    let characteristics = (req.params.characteristics)
+    const product_id = parseInt(req.params.id);
+    const rating = (req.params.rating)
+    const summary = (req.params.rating)
+    const body = (req.params.body)
+    const recommend = (req.params.recommend)
+    const name = (req.params.name)
+    const email = (req.params.email)
+    const photos = (req.params.photos)
+    const characteristics = (req.params.characteristics)
 
-    RW.reviews.newReview([id])
-    .then(response => {
-          res.status(201).send('Review created');
-    })
-    .catch(err => console.log(err));
+    try {
+      let response = await RW.reviews.newReview([product_id])
+      res.status(201).send('review created');
+    } catch (error) {
+      console.error(error);
+      res.status(404);
+    }
+
   },
 
+  markHelpful: async (req, res) => {
 
-  markHelpful: (req, res) => {
-    var id = parseInt(req.params.id) || 1;
-    RW.reviews.helpfulQuestion([id])
-    .then(response => {
-      res.status(200).send();
-    })
-    .catch(err => console.log(err));
+    const review_id = parseInt(req.params.id);
+
+    try {
+      let response = RW.reviews.helpfulReview([review_id]);
+      res.status(200).send('marked as helpful');
+
+    } catch (error) {
+      console.error(error);
+      res.status(404);
+    }
+
   },
 
-  reportReview: (req, res) => {
-    var id = parseInt(req.params.id) || 1;
-    RW.reviews.reportReview([id])
-    .then(response => {
-      res.status(200).send();
-    })
-    .catch(err => console.log(err));
+  reportReview: async (req, res) => {
+    const review_id = parseInt(req.params.id);
+
+    try {
+      let = await RW.reviews.reportReview([review_id]);
+      res.status(200).send('review reported');
+
+    } catch (error) {
+      console.error(error);
+      res.status(404);
+    }
   },
 
 };
